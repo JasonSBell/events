@@ -4,6 +4,9 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"log"
+	"strings"
+	"time"
 
 	_ "github.com/lib/pq"
 
@@ -85,33 +88,54 @@ func GetEvent(db *sql.DB, id string) (events.GenericEvent, error) {
 	return event, nil
 }
 
-func ListEvents(db *sql.DB, event events.GenericEvent) ([]events.GenericEvent, error) {
-	rows, err := db.Query(`SELECT
-			id,
-			timestamp,
-			name,
-			source,
-			body
-		FROM events
-		WHERE
-			timestamp >= $1
-			timestamp <  $2
-			name ilike '%$3%'
-			name ilike '%$3%'
-	`)
+func ListEvents(db *sql.DB, from *time.Time, to *time.Time, name *string, source *string) ([]events.GenericEvent, error) {
+	query := "SELECT id, timestamp, name, source, body FROM events"
+
+	filters := []string{}
+	args := []any{}
+
+	if from != nil {
+		filters = append(filters, fmt.Sprintf("timestamp >= $%d", len(filters)+1))
+		args = append(args, from)
+	}
+
+	if to != nil {
+		filters = append(filters, fmt.Sprintf("timestamp < $%d", len(filters)+1))
+		args = append(args, to)
+	}
+
+	if name != nil {
+		filters = append(filters, fmt.Sprintf("name = $%d", len(filters)+1))
+		args = append(args, name)
+	}
+
+	if source != nil {
+		filters = append(filters, fmt.Sprintf("source = $%d", len(filters)+1))
+		args = append(args, source)
+	}
+
+	if len(filters) > 0 {
+		query += " WHERE " + strings.Join(filters, " AND ")
+	}
+
+	query += " ORDER BY timestamp DESC"
+
+	log.Println(query, args)
+	rows, err := db.Query(query, args...)
 
 	if err != nil {
 		return []events.GenericEvent{}, err
 	}
 	defer rows.Close()
 
-	var list []events.GenericEvent
+	list := []events.GenericEvent{}
 	for rows.Next() {
 		var event events.GenericEvent
 		err = rows.Scan(&event.Id, &event.Timestamp, &event.Name, &event.Source, &event.Body)
 		if err != nil {
-			list = append(list, event)
+			return list, err
 		}
+		list = append(list, event)
 	}
 	return list, nil
 }
@@ -129,8 +153,30 @@ func ListNames(db *sql.DB) ([]string, error) {
 		var name string
 		err = rows.Scan(&name)
 		if err != nil {
-			list = append(list, name)
+			return list, err
 		}
+		list = append(list, name)
+	}
+
+	return list, nil
+}
+
+func ListSources(db *sql.DB) ([]string, error) {
+	rows, err := db.Query(`SELECT DISTINCT(source) FROM events`)
+
+	if err != nil {
+		return []string{}, err
+	}
+	defer rows.Close()
+
+	var list []string
+	for rows.Next() {
+		var source string
+		err = rows.Scan(&source)
+		if err != nil {
+			return list, err
+		}
+		list = append(list, source)
 	}
 
 	return list, nil
