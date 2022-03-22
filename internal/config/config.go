@@ -50,7 +50,7 @@ func Get() (Config, error) {
 	return Config{
 		Port: port,
 		AMQPConfig: AMQPConfig{
-			Host:     os.Getenv("AQMP_HOST"),
+			Host:     os.Getenv("AMQP_HOST"),
 			Port:     amqpPort,
 			Username: os.Getenv("AMQP_USERNAME"),
 			Password: os.Getenv("AMQP_PASSWORD"),

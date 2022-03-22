@@ -1,14 +1,13 @@
 package main
 
 import (
+	"fmt"
 	"log"
-	"time"
 
 	"events/internal/config"
 	"events/internal/db"
+	"events/internal/queue"
 	"events/pkg/events"
-
-	"github.com/google/uuid"
 )
 
 func main() {
@@ -29,8 +28,28 @@ func main() {
 		log.Fatal(err)
 	}
 
-	if _, err := db.UpsertEvent(pg, events.GenericEvent{Id: uuid.New().String(), Timestamp: time.Now(), Name: "access.requests", Source: "test", Body: "{ \"email: \"jsbell9@gmail.com\"}"}); err != nil {
+	amqp, err := queue.Connect(config.AMQPConfig.Host, config.AMQPConfig.Port, config.AMQPConfig.Username, config.AMQPConfig.Password)
+	if err != nil {
 		log.Fatal(err)
 	}
 
+	if err := queue.Init(amqp); err != nil {
+		log.Fatal(err)
+	}
+
+	ch, err := amqp.Channel()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Run an endless consumer loop.
+	queue.Consume(ch, func(event *events.GenericEvent) bool {
+		fmt.Println("Received event:", event)
+		if _, err := db.UpsertEvent(pg, *event); err != nil {
+			log.Println(err)
+			return false
+		}
+		return true
+	})
+	log.Print("bye!")
 }

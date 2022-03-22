@@ -1,3 +1,5 @@
 package events
 
-type GenericEvent Event[any]
+import "encoding/json"
+
+type GenericEvent Event[json.RawMessage]

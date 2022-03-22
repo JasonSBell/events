@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"events/internal/config"
+	"events/internal/db"
 	"events/internal/queue"
 	"events/pkg/events"
 	"events/pkg/validation"
@@ -30,8 +31,30 @@ func main() {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("Listening on port %d\n", config.Port)
-	fmt.Println()
+	// Connect to the database.
+	pg, err := db.Connect(config.Database.Host, config.Database.Port, config.Database.User, config.Database.Password, config.Database.Database)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Initialize the database.
+	if err := db.Init(pg); err != nil {
+		log.Fatal(err)
+	}
+
+	amqp, err := queue.Connect(config.AMQPConfig.Host, config.AMQPConfig.Port, config.AMQPConfig.Username, config.AMQPConfig.Password)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if err := queue.Init(amqp); err != nil {
+		log.Fatal(err)
+	}
+
+	ch, err := amqp.Channel()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	router := gin.Default()
 
@@ -101,7 +124,6 @@ func main() {
 				errors = append(errors, "source must be a string")
 			} else {
 				event.Source = strings.ReplaceAll(strings.ReplaceAll(s, " ", "-"), " ", "-")
-				fmt.Println(event.Source)
 			}
 		} else {
 			errors = append(errors, "source is required")
@@ -112,18 +134,25 @@ func main() {
 			switch v := val.(type) {
 			case string:
 				if validation.IsJSON(v) {
-					event.Body = val
+					event.Body = []byte(v)
 				} else {
 					errors = append(errors, "body must be valid JSON object")
 				}
 			case []byte:
 				if validation.IsJSON(v) {
-					event.Body = val
+					event.Body = v
 				} else {
 					errors = append(errors, "body must be valid JSON object")
 				}
+			case map[string]any:
+				b, err := json.Marshal(&v)
+				if err != nil {
+					errors = append(errors, "body must be valid JSON object")
+				} else {
+					event.Body = b
+				}
 			case nil:
-				event.Body = v
+				event.Body = []byte{}
 			default:
 				errors = append(errors, "body must be valid JSON object")
 			}
@@ -144,10 +173,116 @@ func main() {
 		event.Id = uuid.New().String()
 
 		// Queue it up.
-		if err := queue.Enqueue(event); err != nil {
-			fmt.Println("failed to queue up event")
+		if err := queue.Enqueue(ch, event); err != nil {
+			c.JSON(http.StatusInternalServerError, event)
+			log.Fatal(err)
 		}
 
+		c.JSON(http.StatusOK, event)
+	})
+
+	// Endpoint for fetching a list of events.
+	router.GET("/api/events", func(c *gin.Context) {
+		// Validate the request.
+		errors := []string{}
+
+		var from *time.Time
+		var to *time.Time
+		var name *string
+		var source *string
+
+		// Validate optional from field.
+		if val, ok := c.GetQuery("from"); ok {
+			if v, err := time.Parse(time.RFC3339, val); err != nil {
+				errors = append(errors, "from must be an RFC-3339 compliant string")
+			} else {
+				from = &v
+			}
+		}
+
+		// Validate optional to field.
+		if val, ok := c.GetQuery("to"); ok {
+			if v, err := time.Parse(time.RFC3339, val); err != nil {
+				errors = append(errors, "to must be an RFC-3339 compliant string")
+			} else {
+				to = &v
+			}
+		}
+
+		if v, ok := c.GetQuery("name"); !ok {
+			name = nil
+		} else {
+			name = &v
+		}
+
+		if v, ok := c.GetQuery("source"); !ok {
+			source = nil
+		} else {
+			source = &v
+		}
+
+		// Return any errors if appropriate.
+		if len(errors) > 0 {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"errors": errors,
+			})
+			return
+		}
+
+		events, err := db.ListEvents(pg, from, to, name, source)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"errors": []string{"database error"}})
+			log.Println(err)
+			return
+		}
+		c.JSON(http.StatusOK, events)
+	})
+
+	// Endpoint for fetching a list of unique event names.
+	router.GET("/api/events/names", func(c *gin.Context) {
+		names, err := db.ListNames(pg)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"errors": []string{"database error"}})
+			log.Println(err)
+			return
+		}
+		c.JSON(http.StatusOK, names)
+	})
+
+	// Endpoint for fetching a list of unique event names.
+	router.GET("/api/events/sources", func(c *gin.Context) {
+		sources, err := db.ListSources(pg)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"errors": []string{"database error"}})
+			log.Println(err)
+			return
+		}
+		c.JSON(http.StatusOK, sources)
+	})
+
+	// Endpoint for fetching a list of unique event names.
+	router.GET("/api/events/:id", func(c *gin.Context) {
+		errors := []string{}
+
+		id := c.Param("id")
+		if !validation.IsValidUUID(id) {
+			errors = append(errors, "id must be a valid UUID4 string")
+		}
+
+		// Return any errors if appropriate.
+		if len(errors) > 0 {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"errors": errors,
+			})
+			return
+		}
+
+		event, err := db.GetEvent(pg, id)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"errors": []string{"database error"}})
+			log.Println(err)
+			return
+		}
 		c.JSON(http.StatusOK, event)
 	})
 
@@ -157,6 +292,8 @@ func main() {
 		Handler: router,
 	}
 	go func() {
+		fmt.Printf("Listening on port %d\n", config.Port)
+		fmt.Println()
 		server.ListenAndServe()
 	}()
 
