@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"net/url"
 	"time"
+
+	"github.com/JasonSBell/events/pkg/events"
 )
 
 type Client struct {
@@ -31,26 +33,11 @@ func NewClient(baseURL string, httpClient *http.Client) (Client, error) {
 	}, nil
 }
 
-type Event struct {
-	Timestamp time.Time         `json:"timestamp"`
-	Name      string            `json:"name"`
-	Source    string            `json:"source"`
-	Body      map[string]string `json:"body"`
-}
-
-type EventRecord struct {
-	Event
-	Id        string    `json:"id"`
-	CreatedAt time.Time `json:"createdAt"`
-	UpdatedAt time.Time `json:"updatedAt"`
-}
-
 func Test[T string | int](p T) {
 	fmt.Println(p)
 }
 
-// func (c *Client) Publish[T EventBodyType](event Event[T]) (EventRecord[T], error) {
-func (c *Client) Publish(event Event) (EventRecord, error) {
+func (c *Client) Publish(event events.GenericEvent) (events.GenericEvent, error) {
 	rel := &url.URL{Path: "/api/events"}
 	u := c.BaseURL.ResolveReference(rel)
 
@@ -60,26 +47,26 @@ func (c *Client) Publish(event Event) (EventRecord, error) {
 
 	body, err := json.Marshal(&event)
 	if err != nil {
-		return EventRecord{}, err
+		return events.GenericEvent{}, err
 	}
 
 	req, err := http.NewRequest(http.MethodPut, u.String(), bytes.NewBuffer(body))
 	if err != nil {
-		return EventRecord{}, err
+		return events.GenericEvent{}, err
 	}
 	req.Header.Set("Content-Type", "application/json; charset=utf-8")
 
 	res, err := c.httpClient.Do(req)
 	if err != nil {
-		return EventRecord{}, err
+		return events.GenericEvent{}, err
 	}
 	defer res.Body.Close()
 
 	if res.StatusCode != http.StatusOK {
-		return EventRecord{}, errors.New(res.Status)
+		return events.GenericEvent{}, errors.New(res.Status)
 	}
 
-	e := EventRecord{}
+	e := events.GenericEvent{}
 	json.NewDecoder(res.Body).Decode(&e)
 
 	return e, nil

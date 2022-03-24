@@ -6,7 +6,7 @@ import (
 
 	"github.com/streadway/amqp"
 
-	"events/pkg/events"
+	"github.com/JasonSBell/events/pkg/events"
 )
 
 func Connect(host string, port int, username, password string) (*amqp.Connection, error) {
@@ -35,18 +35,18 @@ func Init(conn *amqp.Connection) error {
 	}
 
 	if _, err := ch.QueueDeclare(
-		"events", // name
-		true,     // durable
-		false,    // delete when unused
-		false,    // exclusive
-		false,    // no-wait
-		nil,      // arguments
+		"log", // name
+		true,  // durable
+		false, // delete when unused
+		false, // exclusive
+		false, // no-wait
+		nil,   // arguments
 	); err != nil {
 		return err
 	}
 
 	if err := ch.QueueBind(
-		"events", // name
+		"log",    // name
 		"#",      // key
 		"events", // exchange
 		false,    // no-wait

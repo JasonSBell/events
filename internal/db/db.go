@@ -10,7 +10,7 @@ import (
 
 	_ "github.com/lib/pq"
 
-	"events/pkg/events"
+	"github.com/JasonSBell/events/pkg/events"
 )
 
 func Connect(host string, port int, user, password, db string) (*sql.DB, error) {

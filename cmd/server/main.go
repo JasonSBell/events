@@ -12,11 +12,11 @@ import (
 	"strings"
 	"time"
 
-	"events/internal/config"
-	"events/internal/db"
-	"events/internal/queue"
-	"events/pkg/events"
-	"events/pkg/validation"
+	"github.com/JasonSBell/events/internal/config"
+	"github.com/JasonSBell/events/internal/db"
+	"github.com/JasonSBell/events/internal/queue"
+	"github.com/JasonSBell/events/pkg/events"
+	"github.com/JasonSBell/events/pkg/validation"
 
 	"github.com/gin-gonic/contrib/cors"
 	"github.com/gin-gonic/gin"
