@@ -80,13 +80,13 @@ func Enqueue(ch *amqp.Channel, event events.GenericEvent) error {
 
 func Consume(ch *amqp.Channel, handler func(*events.GenericEvent) bool) error {
 	deliveries, err := ch.Consume(
-		"events", // name
-		"",       // consumerTag,
-		false,    // noAck
-		false,    // exclusive
-		false,    // noLocal
-		false,    // noWait
-		nil,      // arguments
+		"log", // name
+		"",    // consumerTag,
+		false, // noAck
+		false, // exclusive
+		false, // noLocal
+		false, // noWait
+		nil,   // arguments
 	)
 	if err != nil {
 		return err

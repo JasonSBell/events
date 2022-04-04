@@ -22,6 +22,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer pg.Close()
 
 	// Initialize the database.
 	if err := db.Init(pg); err != nil {
@@ -43,13 +44,16 @@ func main() {
 	}
 
 	// Run an endless consumer loop.
-	queue.Consume(ch, func(event *events.GenericEvent) bool {
+	if err := queue.Consume(ch, func(event *events.GenericEvent) bool {
 		fmt.Println("Received event:", event)
 		if _, err := db.UpsertEvent(pg, *event); err != nil {
 			log.Println(err)
 			return false
 		}
 		return true
-	})
+	}); err != nil {
+		log.Fatal(err)
+	}
+
 	log.Print("bye!")
 }

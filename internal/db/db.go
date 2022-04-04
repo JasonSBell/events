@@ -36,7 +36,7 @@ func Init(db *sql.DB) error {
 }
 
 func UpsertEvent(db *sql.DB, event events.GenericEvent) (events.GenericEvent, error) {
-	_, err := db.Query(`INSERT INTO events (
+	rows, err := db.Query(`INSERT INTO events (
 			id,
 			timestamp,
 			name,
@@ -53,6 +53,7 @@ func UpsertEvent(db *sql.DB, event events.GenericEvent) (events.GenericEvent, er
 	if err != nil {
 		return event, err
 	}
+	defer rows.Close()
 
 	return event, nil
 }
