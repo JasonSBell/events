@@ -100,6 +100,8 @@ func Consume(ch *amqp.Channel, handler func(*events.GenericEvent) bool) error {
 
 		// If handled successfully acknowledge the message.
 		if handler(&event) {
+			d.Ack(true)
+		} else {
 			d.Ack(false)
 		}
 	}
