@@ -17,17 +17,17 @@ type Client struct {
 	httpClient *http.Client
 }
 
-func NewClient(baseURL string, httpClient *http.Client) (Client, error) {
+func NewClient(baseURL string, httpClient *http.Client) (*Client, error) {
 	u, err := url.Parse(baseURL)
 	if err != nil {
-		return Client{}, err
+		return &Client{}, err
 	}
 
 	if httpClient == nil {
 		httpClient = &http.Client{}
 	}
 
-	return Client{
+	return &Client{
 		BaseURL:    u,
 		httpClient: httpClient,
 	}, nil
