@@ -1,4 +1,4 @@
-module github.com/JasonSBell/events
+module github.com/allokate-ai/events
 
 go 1.18
 

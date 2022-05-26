@@ -6,7 +6,7 @@ import (
 
 	"github.com/streadway/amqp"
 
-	"github.com/JasonSBell/events/pkg/events"
+	"github.com/allokate-ai/events/pkg/events"
 )
 
 func Connect(host string, port int, username, password string) (*amqp.Connection, error) {

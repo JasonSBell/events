@@ -25,7 +25,7 @@ The service writes semi structured event data to the Mongo database and subseque
 ```json
 {
   "timestamp": "2022-03-19T12:31:52Z",
-  "type": "article.created",
+  "type": "article.published",
   "body": {
     // Specific to the event this field can be anything from a number, to a string, to a JSON body or a binary blob.
     "id": "622df6275e872cc36c45056a",

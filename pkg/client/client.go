@@ -9,7 +9,7 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/JasonSBell/events/pkg/events"
+	"github.com/allokate-ai/events/pkg/events"
 )
 
 type Client struct {

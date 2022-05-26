@@ -12,11 +12,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/JasonSBell/events/internal/config"
-	"github.com/JasonSBell/events/internal/db"
-	"github.com/JasonSBell/events/internal/queue"
-	"github.com/JasonSBell/events/pkg/events"
-	"github.com/JasonSBell/events/pkg/validation"
+	"github.com/allokate-ai/events/internal/config"
+	"github.com/allokate-ai/events/internal/db"
+	"github.com/allokate-ai/events/internal/queue"
+	"github.com/allokate-ai/events/pkg/events"
+	"github.com/allokate-ai/events/pkg/validation"
 
 	"github.com/gin-gonic/contrib/cors"
 	"github.com/gin-gonic/gin"
