@@ -1,3 +1,5 @@
+github.com/allokate-ai/environment v0.0.0-20220811173816-5755ba0f94be h1:qw639wGMZ1oBkeze5RHbTu6mubNRORvFVKHY7RXLk18=
+github.com/allokate-ai/environment v0.0.0-20220811173816-5755ba0f94be/go.mod h1:Td3yQwZPixqUIUkHsWmSaSCFXXD2Xvrzjm6vFh1hJLM=
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=

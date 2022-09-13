@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/allokate-ai/events/internal/config"
-	"github.com/allokate-ai/events/internal/db"
-	"github.com/allokate-ai/events/internal/queue"
-	"github.com/allokate-ai/events/pkg/events"
+	"github.com/allokate-ai/events/app/internal/config"
+	"github.com/allokate-ai/events/app/internal/db"
+	"github.com/allokate-ai/events/app/internal/queue"
+	"github.com/allokate-ai/events/app/pkg/events"
 )
 
 func main() {

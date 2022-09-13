@@ -12,6 +12,7 @@ require (
 )
 
 require (
+	github.com/allokate-ai/environment v0.0.0-20220811173816-5755ba0f94be // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/go-playground/locales v0.14.0 // indirect
 	github.com/go-playground/universal-translator v0.18.0 // indirect

@@ -10,7 +10,7 @@ import (
 
 	_ "github.com/lib/pq"
 
-	"github.com/allokate-ai/events/pkg/events"
+	"github.com/allokate-ai/events/app/pkg/events"
 )
 
 func Connect(host string, port int, user, password, db string) (*sql.DB, error) {
