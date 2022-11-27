@@ -7,7 +7,6 @@ import (
 	"github.com/google/uuid"
 )
 
-// Define the JSON body structure for publishing an article (article.created).
 type ArticlePublished struct {
 	Source   string    `json:"source"`
 	SiteName string    `json:"siteName"`
@@ -15,7 +14,6 @@ type ArticlePublished struct {
 	Title    string    `json:"title"`
 	Url      string    `json:"url"`
 	Date     time.Time `json:"date"`
-	Tags     []string  `json:"tags"`
 }
 
 func (c *Client) EmitArticlePublishedEvent(source string, article ArticlePublished) (GenericEvent, error) {
