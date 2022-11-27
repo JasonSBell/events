@@ -15,7 +15,7 @@ import (
 	"github.com/allokate-ai/events/app/internal/config"
 	"github.com/allokate-ai/events/app/internal/db"
 	"github.com/allokate-ai/events/app/internal/queue"
-	"github.com/allokate-ai/events/app/pkg/events"
+	events "github.com/allokate-ai/events/app/pkg/client"
 	"github.com/allokate-ai/events/app/pkg/validation"
 
 	"github.com/gin-gonic/contrib/cors"

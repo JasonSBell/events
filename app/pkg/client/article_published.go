@@ -8,12 +8,12 @@ import (
 )
 
 type ArticlePublished struct {
-	Source   string    `json:"source"`
-	SiteName string    `json:"siteName"`
-	Byline   string    `json:"byline"`
-	Title    string    `json:"title"`
 	Url      string    `json:"url"`
+	Title    string    `json:"title"`
+	Byline   string    `json:"byline"`
+	SiteName string    `json:"siteName"`
 	Date     time.Time `json:"date"`
+	Source   string    `json:"source"`
 }
 
 func (c *Client) EmitArticlePublishedEvent(source string, article ArticlePublished) (GenericEvent, error) {
