@@ -1,4 +1,4 @@
-package events
+package client
 
 import (
 	"time"

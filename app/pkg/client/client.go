@@ -4,12 +4,9 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
 	"net/url"
 	"time"
-
-	"github.com/allokate-ai/events/pkg/events"
 )
 
 type Client struct {
@@ -33,11 +30,7 @@ func NewClient(baseURL string, httpClient *http.Client) (*Client, error) {
 	}, nil
 }
 
-func Test[T string | int](p T) {
-	fmt.Println(p)
-}
-
-func (c *Client) Publish(event events.GenericEvent) (events.GenericEvent, error) {
+func (c *Client) Publish(event GenericEvent) (GenericEvent, error) {
 	rel := &url.URL{Path: "/api/events"}
 	u := c.BaseURL.ResolveReference(rel)
 
@@ -47,26 +40,26 @@ func (c *Client) Publish(event events.GenericEvent) (events.GenericEvent, error)
 
 	body, err := json.Marshal(&event)
 	if err != nil {
-		return events.GenericEvent{}, err
+		return GenericEvent{}, err
 	}
 
 	req, err := http.NewRequest(http.MethodPut, u.String(), bytes.NewBuffer(body))
 	if err != nil {
-		return events.GenericEvent{}, err
+		return GenericEvent{}, err
 	}
 	req.Header.Set("Content-Type", "application/json; charset=utf-8")
 
 	res, err := c.httpClient.Do(req)
 	if err != nil {
-		return events.GenericEvent{}, err
+		return GenericEvent{}, err
 	}
 	defer res.Body.Close()
 
 	if res.StatusCode != http.StatusOK {
-		return events.GenericEvent{}, errors.New(res.Status)
+		return GenericEvent{}, errors.New(res.Status)
 	}
 
-	e := events.GenericEvent{}
+	e := GenericEvent{}
 	json.NewDecoder(res.Body).Decode(&e)
 
 	return e, nil
