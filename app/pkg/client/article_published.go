@@ -29,7 +29,7 @@ func (c *Client) EmitArticlePublishedEvent(source string, article ArticlePublish
 	e := GenericEvent{
 		Id:        uuid.New().String(),
 		Timestamp: time.Now(),
-		Name:      "news",
+		Name:      "article.published",
 		Source:    source,
 		Body:      data,
 	}
