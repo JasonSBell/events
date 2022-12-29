@@ -7,13 +7,12 @@ import (
 	"github.com/google/uuid"
 )
 
-type AccessRequested struct {
-	FirstName string `json:"firstName"`
-	LastName  string `json:"lastName"`
+type Invite struct {
+	InvitedBy string `json:"invitedBy"`
 	Email     string `json:"email"`
 }
 
-func (c *Client) EmitAccessRequestedEvent(source string, payload AccessRequested) (GenericEvent, error) {
+func (c *Client) EmitInviteEvent(source string, payload Invite) (GenericEvent, error) {
 	// Serialize the body to a JSON string.
 	data, err := json.Marshal(payload)
 	if err != nil {
@@ -24,7 +23,7 @@ func (c *Client) EmitAccessRequestedEvent(source string, payload AccessRequested
 	e := GenericEvent{
 		Id:        uuid.New().String(),
 		Timestamp: time.Now(),
-		Name:      "access.requested",
+		Name:      "user.invite",
 		Source:    source,
 		Body:      data,
 	}
